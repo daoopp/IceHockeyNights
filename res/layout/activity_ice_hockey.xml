@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <Button
+        android:id="@+id/StartSingle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="568dp"
+        android:layout_marginTop="272dp"
+        android:text="@string/Start" />
+
+    <Button
+        android:id="@+id/CreateMulti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/StartSingle"
+        android:layout_centerVertical="true"
+        android:text="@string/Create" />
+
+    <Button
+        android:id="@+id/JoinMulti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/StartSingle"
+        android:layout_alignRight="@+id/StartSingle"
+        android:layout_marginBottom="53dp"
+        android:text="@string/Join" />
+
+</RelativeLayout>

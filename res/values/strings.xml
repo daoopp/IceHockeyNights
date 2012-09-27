@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">IceHockey</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_ice_hockey">IceHockeyActivity</string>
+    <string name="Start">Start</string>
+    <string name="Join">Join</string>
+    <string name="Create">Create</string>
+
+</resources>
