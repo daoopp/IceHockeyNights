@@ -2,44 +2,48 @@ package ice.hockey;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
+import java.nio.FloatBuffer;
 import android.opengl.GLES20;
-import android.util.FloatMath;
+import android.opengl.Matrix;
 
 public class Puck extends Drawable {
-	private float color[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	private int vertexCount;
+	private final FloatBuffer mTriangle1Vertices;
+	private final int mBytesPerFloat = 4;
+	private final int mPositionOffset = 0;
+	private final int mPositionDataSize = 3;
+	private final int mColorOffset = 3;
+	private final int mColorDataSize = 4;
+	private final int mStrideBytes = 7 * mBytesPerFloat;
 	
-	public Puck() {
-		int points = 40;
-		float[] vertices = new float[(points+1)*3];
+    private int mPositionHandle;
+    private int mColorHandle;
+    private int mMVPMatrixHandle;
+	
+	final float[] triangle1VerticesData = {
+            -0.5f, -0.2f, 0.0f, 
+            1.0f, 0.0f, 0.0f, 1.0f,
 
-		//CENTER OF CIRCLE
-		vertices[0]=0.0f;
-		vertices[1]=0.0f;
-		vertices[2]=0.0f;
+            0.5f, -0.2f, 0.0f,
+            0.0f, 0.0f, 1.0f, 1.0f,
 
-		for (int i = 3; i<(points+1)*3; i+=3){
-		    float rad = deg2rad(360.0 - i*360/(points*3));
-		    vertices[i] = (float) (FloatMath.cos(rad));
-		    vertices[i+1] = (float) (FloatMath.sin(rad));
-		    vertices[i+2] = 0;
-		}
-		
-        ByteBuffer bb = ByteBuffer.allocateDirect(vertices.length * 4);
-        bb.order(ByteOrder.nativeOrder());
-
-        objectBuffer = bb.asFloatBuffer();
-        objectBuffer.put(vertices);
-        objectBuffer.position(0);
-        
-        vertexCount = vertices.length / COORDS_PER_VERTEX;
-        vertexStride = vertexCount * 4;
-
-        mProgram = GLES20.glCreateProgram();            
-        GLES20.glAttachShader(mProgram, vertexShader); 
-        GLES20.glAttachShader(mProgram, fragmentShader);
-        GLES20.glLinkProgram(mProgram);
+            0.0f, 0.5f, 0.0f, 
+            0.0f, 1.0f, 0.0f, 1.0f };
+			
+	public Puck() {		
+		mTriangle1Vertices = ByteBuffer.allocateDirect(triangle1VerticesData.length * mBytesPerFloat)
+		        .order(ByteOrder.nativeOrder()).asFloatBuffer();	
+		mTriangle1Vertices.put(triangle1VerticesData).position(0);
+	}
+	
+	public void setHandles(int position, int color, int matrix, int sProgram) {
+		this.shaderProgram = sProgram;
+		this.mMVPMatrixHandle = matrix;
+		this.mPositionHandle = position;
+		this.mColorHandle = color;
+	}
+	
+	public void setMatrix(float[] projectionMatrix) {
+		this.mProjectionMatrix = projectionMatrix;
 	}
 	
 	@Override
@@ -48,24 +52,26 @@ public class Puck extends Drawable {
 	}
 
 	@Override
-	public void draw(float[] mvpMatrix) {		
-        GLES20.glUseProgram(mProgram);
+	public void draw() {			   
+        Matrix.setIdentityM(mModelMatrix, 0);
+        Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
+		Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);        
 
-        int mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
+		mTriangle1Vertices.position(mPositionOffset);
+		GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize, GLES20.GL_FLOAT, false,
+        		mStrideBytes, mTriangle1Vertices);                      
+        GLES20.glEnableVertexAttribArray(mPositionHandle);        
+        
+        mTriangle1Vertices.position(mColorOffset);
+		GLES20.glVertexAttribPointer(mColorHandle, mColorDataSize, GLES20.GL_FLOAT, false,
+        		mStrideBytes, mTriangle1Vertices);              
+        GLES20.glEnableVertexAttribArray(mColorHandle);
+        
+        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                                     GLES20.GL_FLOAT, false,
-                                     vertexStride, objectBuffer);
+		Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
-        int mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
-
-        int mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, vertexCount);
-
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
+		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
 	}
 }

@@ -3,10 +3,10 @@ package ice.hockey;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
-public class IceHockeyGLView extends GLSurfaceView {
+public class IceHockeyView extends GLSurfaceView {
 	GameRenderer renderer;
 	
-	public IceHockeyGLView(Context context) {
+	public IceHockeyView(Context context) {
 		super(context);
 		renderer = new GameRenderer();
 		

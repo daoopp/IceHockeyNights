@@ -7,10 +7,14 @@ import android.view.View;
 import android.widget.Button;
 
 public class IceHockeyActivity extends Activity {
+	IceHockeyView iceHockeyView;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ice_hockey);
+        
+        iceHockeyView = new IceHockeyView(this);
         
         Button start = (Button) findViewById(R.id.StartSingle);
         Button join = (Button) findViewById(R.id.JoinMulti);
@@ -39,6 +43,18 @@ public class IceHockeyActivity extends Activity {
     }
 
 	@Override
+	protected void onPause() {
+		super.onPause();
+		iceHockeyView.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		iceHockeyView.onResume();
+	}
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_ice_hockey, menu);
         return true;
@@ -49,7 +65,7 @@ public class IceHockeyActivity extends Activity {
 	}
 
 	protected void startSinglePlayerGame() {
-		setContentView(new IceHockeyGLView(this));
+		setContentView(iceHockeyView);
 	}
 	
 	protected void createMultiplayerGame() {
