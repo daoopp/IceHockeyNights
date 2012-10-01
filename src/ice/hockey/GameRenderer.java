@@ -6,22 +6,19 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
-
-/**
- * This class implements our custom renderer. Note that the GL10 parameter passed in is unused for OpenGL ES 2.0
- * renderers -- the static class GLES20 is used instead.
- */
 public class GameRenderer implements GLSurfaceView.Renderer 
 {
+	private int[] handles = new int[6];
 	private float[] mViewMatrix = new float[16];
 	private float[] mProjectionMatrix = new float[16];
+	float[] mLightModelMatrix = new float[16];
+    float[] mLightPosInWorldSpace = new float[4];
+    float[] mLightPosInEyeSpace  = new float[4];
+	private final float[] mLightPosInModelSpace = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
 	
-    private int mPositionHandle;
-    private int mColorHandle;
-    private int mMVPMatrixHandle;   
-	
+	/* Game Objects */
 	Puck puck;
-	
+
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
 	{
@@ -56,18 +53,17 @@ public class GameRenderer implements GLSurfaceView.Renderer
 			throw new RuntimeException("Error creating program.");
 		}
         
-        // Set program handles. These will later be used to pass in values to the program.
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");        
-        mPositionHandle = GLES20.glGetAttribLocation(programHandle, "a_Position");
-        mColorHandle = GLES20.glGetAttribLocation(programHandle, "a_Color");        
-        
-        // Tell OpenGL to use this program when rendering.
-        GLES20.glUseProgram(programHandle);
+		handles[0] = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
+        handles[1] = GLES20.glGetUniformLocation(programHandle, "u_MVMatrix"); 
+        handles[2] = GLES20.glGetUniformLocation(programHandle, "u_LightPos");
+        handles[3] = GLES20.glGetAttribLocation(programHandle, "a_Position");
+        handles[4] = GLES20.glGetAttribLocation(programHandle, "a_Color");
+        handles[5] = GLES20.glGetAttribLocation(programHandle, "a_Normal");        
         
         puck = new Puck();
-        puck.setHandles(mPositionHandle, mColorHandle, mMVPMatrixHandle);
-	}	
-	
+        puck.setHandles(handles);
+	}		
+
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) 
 	{
@@ -91,8 +87,16 @@ public class GameRenderer implements GLSurfaceView.Renderer
 	@Override
 	public void onDrawFrame(GL10 glUnused) 
 	{
-		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);			        
-
-		puck.draw();
+		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+	
+		Matrix.setIdentityM(mLightModelMatrix, 0);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -5.0f);      
+        Matrix.rotateM(mLightModelMatrix, 0, 20f, 0.0f, 1.0f, 0.0f);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
+               
+		Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
+		Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);
+		
+		puck.draw(mLightPosInEyeSpace);
 	}	
 }
