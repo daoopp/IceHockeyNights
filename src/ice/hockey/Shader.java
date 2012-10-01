@@ -3,6 +3,39 @@ package ice.hockey;
 import android.opengl.GLES20;
 
 public class Shader {	
+	public static int getShaderProgram() {
+		int programHandle = GLES20.glCreateProgram();
+		
+		if (programHandle != 0) 
+		{
+			// Bind the vertex shader to the program.
+			GLES20.glAttachShader(programHandle, getShader(GLES20.GL_VERTEX_SHADER));			
+
+			// Bind the fragment shader to the program.
+			GLES20.glAttachShader(programHandle, getShader(GLES20.GL_FRAGMENT_SHADER));
+			
+			// Bind attributes
+			GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
+			GLES20.glBindAttribLocation(programHandle, 1, "a_Color");
+			
+			// Link the two shaders together into a program.
+			GLES20.glLinkProgram(programHandle);
+
+			// Get the link status.
+			final int[] linkStatus = new int[1];
+			GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
+
+			// If the link failed, delete the program.
+			if (linkStatus[0] == 0) 
+			{				
+				GLES20.glDeleteProgram(programHandle);
+				programHandle = 0;
+			}
+		}
+		
+		return programHandle;
+	}
+	
 	private static int getShader(int type) {
 		int shaderHandle = GLES20.glCreateShader(type);
 
@@ -52,38 +85,5 @@ public class Shader {
 		+ "void main()                    \n"		// The entry point for our fragment shader.
 		+ "{                              \n"
 		+ "   gl_FragColor = v_Color;     \n"		// Pass the color directly through the pipeline.		  
-		+ "}                              \n";
-
-	public static int getShaderProgram() {
-		int programHandle = GLES20.glCreateProgram();
-		
-		if (programHandle != 0) 
-		{
-			// Bind the vertex shader to the program.
-			GLES20.glAttachShader(programHandle, getShader(GLES20.GL_VERTEX_SHADER));			
-
-			// Bind the fragment shader to the program.
-			GLES20.glAttachShader(programHandle, getShader(GLES20.GL_FRAGMENT_SHADER));
-			
-			// Bind attributes
-			GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
-			GLES20.glBindAttribLocation(programHandle, 1, "a_Color");
-			
-			// Link the two shaders together into a program.
-			GLES20.glLinkProgram(programHandle);
-
-			// Get the link status.
-			final int[] linkStatus = new int[1];
-			GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
-
-			// If the link failed, delete the program.
-			if (linkStatus[0] == 0) 
-			{				
-				GLES20.glDeleteProgram(programHandle);
-				programHandle = 0;
-			}
-		}
-		
-		return programHandle;
-	}	
+		+ "}                              \n";	
 }

@@ -9,8 +9,8 @@ import android.opengl.Matrix;
 public class Puck extends Drawable {
 	private float[] mModelMatrix = new float[16];
 	private float[] mMVPMatrix = new float[16];
-	private float[] mProjectionMatrix = new float[16];;
-	private float[] mViewMatrix = new float[16];;
+	private float[] mProjectionMatrix = new float[16];
+	private float[] mViewMatrix = new float[16];
 	
 	private final FloatBuffer mTriangle1Vertices;
 	private final int mBytesPerFloat = 4;
@@ -27,8 +27,6 @@ public class Puck extends Drawable {
     private int mMVPMatrixHandle;
 
 	final float[] triangle1VerticesData = {
-			// X, Y, Z, 
-			// R, G, B, A
             -0.5f, -0.25f, 0.0f, 
             1.0f, 0.0f, 0.0f, 1.0f,
             
@@ -57,7 +55,8 @@ public class Puck extends Drawable {
 	
 	public void draw() {
         Matrix.setIdentityM(mModelMatrix, 0);
-		Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);     
+		Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);  
+		Matrix.translateM(mModelMatrix, 0, 0.0f, -1.0f, 0.0f);
         
 		mTriangle1Vertices.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize, GLES20.GL_FLOAT, false,
