@@ -6,7 +6,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
-public class GameRenderer implements GLSurfaceView.Renderer 
+public class GameRenderer implements GLSurfaceView.Renderer
 {
 	private int[] handles = new int[7];
 	private float[] mViewMatrix = new float[16];
@@ -18,6 +18,10 @@ public class GameRenderer implements GLSurfaceView.Renderer
 	
 	/* Game Objects */
 	Puck puck;
+	
+	public void movePuck(float x, float y) {
+		puck.move(x,y);
+	}
 
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
@@ -93,19 +97,12 @@ public class GameRenderer implements GLSurfaceView.Renderer
 		GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
 		Matrix.setIdentityM(lightModelMatrix, 0);
-		Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, -5.0f);      
+		Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, -0.5f);      
 		Matrix.rotateM(lightModelMatrix, 0, 0f, 0.0f, 1.0f, 0.0f);
-		Matrix.translateM(lightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
             
 		Matrix.multiplyMV(mLightPosInWorldSpace, 0, lightModelMatrix, 0, mLightPosInModelSpace, 0);
 		Matrix.multiplyMV(lightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);
 	
 		puck.draw(lightPosInEyeSpace);
-	}
-	
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		puck.release();
 	}
 }

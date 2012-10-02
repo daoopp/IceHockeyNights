@@ -41,14 +41,19 @@ public class Puck extends Drawable {
 	private final float[] colorVector = {
 			1.0f, 0.0f, 0.0f, 1.0f,
 			0.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f
 	};
 	
 	private final float[] normalVector = {
 			0f, 0f, 1f,				
 			0f, 0f, 1f,				
-			0f, 0f, 1f,			
+			0f, 0f, 1f			
 	};
+	private float xPosition = 0;
+	
+	public void move(float x, float y) {
+		xPosition = x;
+	}
 		
 	public Puck() {		
 		positionVertices = ByteBuffer.allocateDirect(positionVector.length * BYTES_PER_FLOAT)
@@ -83,7 +88,7 @@ public class Puck extends Drawable {
 	public void draw(float[] lightPosInEyeSpace) {
         Matrix.setIdentityM(modelMatrix, 0);
 		Matrix.rotateM(modelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);  
-		Matrix.translateM(modelMatrix, 0, 0.0f, 0.0f, 0.0f);
+		Matrix.translateM(modelMatrix, 0, xPosition , 0.0f, 0.0f);
 		
         Matrix.multiplyMM(MVPMatrix, 0, viewMatrix, 0, modelMatrix, 0);
         Matrix.multiplyMM(MVPMatrix, 0, projectionMatrix, 0, MVPMatrix, 0);

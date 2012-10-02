@@ -6,5 +6,4 @@ public abstract class Drawable {
 	}
 
 	abstract public void release();
-
 }
