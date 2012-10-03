@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.util.FloatMath;
 
 public class Puck extends Drawable {
 	static final int POSITION_DATA_SIZE = 3;	
@@ -24,6 +25,7 @@ public class Puck extends Drawable {
 	private final FloatBuffer normalVertices;
 	
     private float angleInDegrees = 0;
+    private int points =  360;
     
     private int positionHandle;
     private int colorHandle;
@@ -32,30 +34,47 @@ public class Puck extends Drawable {
     private int mMVPMatrixHandle;
 	private int MVMatrixHandle;
 
-	private final float[] positionVector = {
-            -0.5f, -0.25f, 0.0f,         
-            0.5f, -0.25f, 0.0f,           
-            0.0f, 0.55f, 0.0f                 
-	};
+	private final float[] positionVector;
+	private final float[] colorVector;
+	private final float[] normalVector;
 	
-	private final float[] colorVector = {
-			1.0f, 0.0f, 0.0f, 1.0f,
-			0.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f
-	};
-	
-	private final float[] normalVector = {
-			0f, 0f, 1f,				
-			0f, 0f, 1f,				
-			0f, 0f, 1f			
-	};
 	private float xPosition = 0;
 	
 	public void move(float x, float y) {
 		xPosition = x;
 	}
 		
-	public Puck() {		
+	public Puck() {
+		float theta = 1;
+		positionVector = new float[(points+1)*3];
+		colorVector = new float[(points+1)*4];
+		normalVector = new float[(points+1)*3];
+		
+        positionVector[0] = 0;
+        positionVector[1] = 0;
+        positionVector[2] = 0; 
+		
+		/* Fill position and normal vectors */
+        for(int i = 3; i < (points)*3 ; i += 3)
+        {     
+            positionVector[i]   = (float) (FloatMath.cos(theta))/3;
+	        positionVector[i+1] = (float) (FloatMath.sin(theta))/3;
+	        positionVector[i+2] = 0;
+	        theta += Math.PI / 90;
+           
+            normalVector[i]   = 0f;
+            normalVector[i+1] = 0f;
+            normalVector[i+2] = 1f;
+        }
+        
+        /* Fill color vector */
+        for(int i = 0; i < (points)*4; i += 4) {
+            colorVector[i]   = 1.0f;
+            colorVector[i+1] = 0.0f;
+            colorVector[i+2] = 0.0f;
+            colorVector[i+3] = 1.0f;
+        }
+		
 		positionVertices = ByteBuffer.allocateDirect(positionVector.length * BYTES_PER_FLOAT)
 		        .order(ByteOrder.nativeOrder()).asFloatBuffer();	
 		positionVertices.put(positionVector).position(0);
@@ -76,8 +95,7 @@ public class Puck extends Drawable {
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, colorVertices.capacity() * BYTES_PER_FLOAT, colorVertices, GLES20.GL_STATIC_DRAW);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboIds[2]);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, normalVertices.capacity() * BYTES_PER_FLOAT, normalVertices,
-				GLES20.GL_STATIC_DRAW);
+		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, normalVertices.capacity() * BYTES_PER_FLOAT, normalVertices, GLES20.GL_STATIC_DRAW);
 	}
 	
 	public void setMatrix(float[] projectionMatrix, float[] viewMatrix) {
@@ -111,7 +129,7 @@ public class Puck extends Drawable {
                 
         GLES20.glUniform3f(lightHandle, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
         
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, positionVector.length/3);
 	}
 
 	public void setHandles(int[] handles) {
